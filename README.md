@@ -11,7 +11,7 @@ npm install @floratmin/svelte-fragment-divider
 
 ```ts
 import fs from 'fs';
-import {svelteFragmentDivider} from './divideFragments';
+import {svelteFragmentDivider} from '@floratmin/svelte-fragment-divider';
 
 const svelteFile = fs.readFileSync('./App.svelte', 'utf-8');
 
