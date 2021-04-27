@@ -30,7 +30,7 @@ From the following file
 ```
 we get the following object:
 ```js
-fragments === {
+{
    htmlFragments: [
     {
       fragment: `\n<p>{'Foo'}</p>`,
