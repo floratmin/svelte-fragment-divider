@@ -3,11 +3,11 @@
 Divide svelte files into script, style and HTML fragments including the line number where each fragment starts. 
 Empty HTML fragments are ignored.
 
-## Installlation
+### Installation
 
 npm install @floratmin/svelte-fragment-divider
 
-Usage:
+### Usage:
 
 ```ts
 import fs from 'fs';
