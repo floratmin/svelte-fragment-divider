@@ -1,6 +1,6 @@
 {
   "name": "@floratmin/svelte-fragment-divider",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Divide svelte files into script, style and HTML fragments",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
