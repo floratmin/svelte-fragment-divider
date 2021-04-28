@@ -44,7 +44,12 @@ we get the following object:
   fileName: 'src/App.svelte',
   htmlFragments: [
     {
-      fragment: `\n<p>{'Foo'}</p>\n{#if ifCondition}\n  <Component prop={bar}>{baz}</Component>\n{/if}\n`,
+      fragment: `
+<p>{'Foo'}</p>
+{#if ifCondition}
+  <Component prop={bar}>{baz}</Component>
+{/if}
+`,
       startLine: 10,
     },
   ],
