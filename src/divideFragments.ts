@@ -138,10 +138,10 @@ export function svelteJsParser(fragment: SvelteCodeFragment): SvelteCodeFragment
       .flatMap(
         (child) => (child.type === 'InlineComponent'
           ? [
-            ...child.attributes.flatMap((attribute: TemplateNode) => getChildJs(attribute, fragment.fragment)),
-            ...(child.children ? child.children.flatMap((attribute: TemplateNode) => getChildJs(attribute, fragment.fragment)) : []),
+            ...child.attributes.flatMap((attribute: TemplateNode) => getChildFragment(attribute, fragment.fragment)),
+            ...(child.children ? child.children.flatMap((attribute: TemplateNode) => getChildFragment(attribute, fragment.fragment)) : []),
           ]
-          : getChildJs(child, fragment.fragment)
+          : getChildFragment(child, fragment.fragment)
         )
           .map((codeFragment: SvelteCodeFragment) => ({fragment: codeFragment.fragment, startLine: fragment.startLine + codeFragment.startLine - 1})),
       );
@@ -149,24 +149,24 @@ export function svelteJsParser(fragment: SvelteCodeFragment): SvelteCodeFragment
   return undefined;
 }
 
-function getChildJs(child: TemplateNode, svelteFile: string): SvelteCodeFragment[] {
+function getChildFragment(child: TemplateNode, svelteFile: string): SvelteCodeFragment[] {
   if (['MustacheTag', 'RawMustacheTag'].includes(child.type)) {
     return [{fragment: svelteFile.slice(child.expression.start, child.expression.end), startLine: child.expression.loc.start.line}];
   }
   if (child.type === 'Element') {
     const children: {fragment: string, startLine: number}[] | undefined = [];
     child.attributes.forEach((attribute: TemplateNode) => {
-      children.push(...getChildJs(attribute, svelteFile));
+      children.push(...getChildFragment(attribute, svelteFile));
     });
     if (child.children) {
       child.children.forEach((node) => {
-        children.push(...getChildJs(node, svelteFile));
+        children.push(...getChildFragment(node, svelteFile));
       });
     }
     return children;
   }
   if (child.type === 'Attribute') {
-    return child.value.flatMap((node: TemplateNode) => getChildJs(node, svelteFile));
+    return child.value.flatMap((node: TemplateNode) => getChildFragment(node, svelteFile));
   }
   if (['Binding', 'EventHandler', 'Class', 'Action', 'Transition', 'Animation', 'Let'].includes(child.type)) {
     return [
@@ -182,8 +182,8 @@ function getChildJs(child: TemplateNode, svelteFile: string): SvelteCodeFragment
         fragment: svelteFile.slice(child.expression.start, child.expression.end),
         startLine: child.expression.loc.start.line,
       },
-      ...child.children!.flatMap((node) => getChildJs(node, svelteFile)),
-      ...(child.else ? child.else.children!.flatMap((node: TemplateNode) => getChildJs(node, svelteFile)) : []),
+      ...child.children!.flatMap((node) => getChildFragment(node, svelteFile)),
+      ...(child.else ? child.else.children!.flatMap((node: TemplateNode) => getChildFragment(node, svelteFile)) : []),
     ];
   }
   if (['AwaitBlock'].includes(child.type)) {
@@ -192,9 +192,9 @@ function getChildJs(child: TemplateNode, svelteFile: string): SvelteCodeFragment
         fragment: svelteFile.slice(child.expression.start, child.expression.end),
         startLine: child.expression.loc.start.line,
       },
-      ...child.pending.children!.flatMap((node: TemplateNode) => getChildJs(node, svelteFile)),
-      ...child.then.children!.flatMap((node: TemplateNode) => getChildJs(node, svelteFile)),
-      ...child.catch.children!.flatMap((node: TemplateNode) => getChildJs(node, svelteFile)),
+      ...child.pending.children!.flatMap((node: TemplateNode) => getChildFragment(node, svelteFile)),
+      ...child.then.children!.flatMap((node: TemplateNode) => getChildFragment(node, svelteFile)),
+      ...child.catch.children!.flatMap((node: TemplateNode) => getChildFragment(node, svelteFile)),
     ];
   }
   return [];

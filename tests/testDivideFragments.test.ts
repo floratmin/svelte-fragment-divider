@@ -19,7 +19,7 @@ describe('Testing the proper division of svelte files', () => {
         }
       </style>
       <body>
-        <p>{'Foo'}</p>
+        <p>{Foo}</p>
       </body>
     `;
     expect(svelteFragmentDivider(svelteFile)).toEqual({
@@ -27,7 +27,7 @@ describe('Testing the proper division of svelte files', () => {
         {
           fragment: i`
             <body>
-              <p>{'Foo'}</p>
+              <p>{Foo}</p>
             </body>
             `,
           startLine: 9,
@@ -35,7 +35,7 @@ describe('Testing the proper division of svelte files', () => {
       ],
       scriptInHTMLFragments: [
         {
-          fragment: '\'Foo\'',
+          fragment: 'Foo',
           startLine: 10,
         },
       ],
