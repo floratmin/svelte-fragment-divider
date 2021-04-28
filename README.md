@@ -31,23 +31,37 @@ From the following file
 </style>
 
 <p>{'Foo'}</p>
+
+{#if ifCondition}
+  {'Bar'}
+{/if}
 ```
 we get the following object:
 ```js
 {
    htmlFragments: [
     {
-      fragment: `\n<p>{'Foo'}</p>`,
-      start: 11,
+      fragment: `\n<p>{'Foo'}</p>\n{#if ifCondition}\n  {'Bar'}\n{/if}`,
+      startLine: 11,
     },
   ],
+  scriptInHTMLFragments: [
+    {
+      fragment: "'Foo'",
+      startLine: 12
+    },
+    {
+      fragment: "'Bar'",
+      startLine: 15 
+    },   
+  ],     
   script: {
     fragment: `<script lang="ts">\n  export let a: string;</script>`,
-    start: 2,   
+    startLine: 2,   
   },
   style: {
     fragment: `<style>\n  p {\n    color: black;\n  }\n</style>`,
-    start: 6,
+    startLine: 6,
   },
 };
 ```

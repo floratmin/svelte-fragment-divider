@@ -28,5 +28,6 @@ module.exports = {
     'no-nested-ternary': 'off',
     'max-len': [1, 160],
     '@typescript-eslint/object-curly-spacing': 'off',
+    '@typescript-eslint/no-use-before-define': 'off',
   },
 };
