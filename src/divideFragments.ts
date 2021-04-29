@@ -44,6 +44,18 @@ export function svelteFragmentDivider(file: string, fileName?: string): SvelteCo
     end: '',
   };
   const splits = secondSplit.flatMap((e) => e);
+  const scriptFirst = secondSplit[0].length === 1;
+  if (jsString && cssString && splits.slice(1).some((split) => split.match(jsRegex) || split.match(cssRegex))) {
+    if ((!scriptFirst && splits[2].match(jsRegex)) || (scriptFirst && splits.slice(1).some((split) => split.match(jsRegex)))) {
+      throw new Error(`File ${`${fileName} `}contains content in <script>...</script> also as text. This is currently not supported.`);
+    } else if ((scriptFirst && splits[2].match(cssRegex)) || (!scriptFirst && splits.slice(1).some((split) => split.match(cssRegex)))) {
+      throw new Error(`File ${`${fileName} `}contains content in <style>...</style> also as text. This is currently not supported.`);
+    }
+  } else if (jsString && splits[1].match(jsRegex)) {
+    throw new Error(`File ${`${fileName} `}contains content in <script>...</script> also as text. This is currently not supported.`);
+  } else if (cssString && splits[1].match(cssRegex)) {
+    throw new Error(`File ${`${fileName} `}contains content in <style>...</style> also as text. This is currently not supported.`);
+  }
   if (jsString && cssString) {
     htmlFragmentAdjusters = splits.flatMap((fragment, i) => (
       i === 0
@@ -88,7 +100,6 @@ export function svelteFragmentDivider(file: string, fileName?: string): SvelteCo
   let endChar = 0;
   let startChar: number;
   if (jsString && cssString) {
-    const scriptFirst = secondSplit[0].length === 1;
     const firstSection = 1;
     const secondSection = firstSection + htmlFragmentsLinesCount[0] + htmlFragmentAdjusters[0];
     const thirdSection = secondSection + (scriptFirst ? jsLength : cssLength) + htmlFragmentAdjusters[1];
@@ -190,7 +201,8 @@ export function svelteFragmentDivider(file: string, fileName?: string): SvelteCo
         endChar,
       };
     }
-    [startChar, endChar] = [endChar + htmlFragmentAdjusters[1], endChar + html.end.length + htmlFragmentAdjusters[1]];
+    endChar += htmlFragmentAdjusters[1];
+    [startChar, endChar] = [endChar, endChar + html.end.length];
     if (stripEmptyStartEnd(html.end) !== '') {
       htmlFragments.push({
         fragment: html.end,
