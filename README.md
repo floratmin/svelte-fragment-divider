@@ -51,33 +51,47 @@ we get the following object:
 {/if}
 `,
       startLine: 10,
+      startChar: 111,
+      endChar: 193
     },
   ],
   scriptInHTMLFragments: [
     {
       fragment: "'Foo'",
-      startLine: 11
+      startLine: 11,
+      startChar: 116,
+      endChar: 121
     },
     {
       fragment: 'ifCondition',
-      startLine: 13
+      startLine: 13,
+      startChar: 133,
+      endChar: 144
     },
     {
       fragment: 'bar',
-      startLine: 14
+      startLine: 14,
+      startChar: 165,
+      endChar: 168
     },
     {
       fragment: 'baz',
-      startLine: 14 
+      startLine: 14,
+      startChar: 171,
+      endChar: 174
     },   
   ],     
   script: {
-    fragment: `<script lang="ts">\n  export let a: string;</script>`,
-    startLine: 1,   
+    fragment: `<script lang="ts">\n  export let a: string;\n</script>`,
+    startLine: 1,
+    startChar: 0,
+    endChar: 52
   },
   style: {
     fragment: `<style lang="less">\n  p {\n    color: black;\n  }\n</style>`,
     startLine: 5,
-  },
+    startChar: 54,
+    endChar: 110
+  }
 };
 ```

@@ -5,6 +5,8 @@ import { parse } from 'node-html-parser';
 export type SvelteCodeFragment = {
   fragment: string;
   startLine: number;
+  startChar: number;
+  endChar: number;
 };
 
 export type SvelteCodeFragments = {
@@ -76,48 +78,134 @@ export function svelteFragmentDivider(file: string, fileName?: string): SvelteCo
     html.start = splits[0].replace(/\r?\n$/, '');
     html.end = splits[1].replace(/^\r?\n/, '');
   }
-  const htmlFragmentLengths = [linesCount(html.start), linesCount(html.middle), linesCount(html.end)];
+  const htmlFragmentsLinesCount = [linesCount(html.start), linesCount(html.middle), linesCount(html.end)];
   const jsLength = linesCount(jsString || '');
   const cssLength = linesCount(cssString || '');
   const htmlFragments: SvelteCodeFragment[] = [];
   let scriptInHTMLFragments: SvelteCodeFragment[] = [];
   let style: SvelteCodeFragment | undefined;
   let script: SvelteCodeFragment | undefined;
+  let endChar = 0;
+  let startChar: number;
   if (jsString && cssString) {
     const scriptFirst = secondSplit[0].length === 1;
     const firstSection = 1;
-    const secondSection = firstSection + htmlFragmentLengths[0] + htmlFragmentAdjusters[0];
+    const secondSection = firstSection + htmlFragmentsLinesCount[0] + htmlFragmentAdjusters[0];
     const thirdSection = secondSection + (scriptFirst ? jsLength : cssLength) + htmlFragmentAdjusters[1];
-    const fourthSection = thirdSection + htmlFragmentLengths[1] + htmlFragmentAdjusters[2];
+    const fourthSection = thirdSection + htmlFragmentsLinesCount[1] + htmlFragmentAdjusters[2];
     const fifthSection = fourthSection + (scriptFirst ? cssLength : jsLength) + htmlFragmentAdjusters[3];
+    [startChar, endChar] = [endChar, endChar + html.start.length];
     if (stripEmptyStartEnd(html.start) !== '') {
-      htmlFragments.push({fragment: html.start, startLine: firstSection});
+      htmlFragments.push({
+        fragment: html.start,
+        startLine: firstSection,
+        startChar,
+        endChar,
+      });
     }
+    endChar += htmlFragmentAdjusters[0];
+    if (scriptFirst) {
+      [startChar, endChar] = [endChar, endChar + jsString.length];
+      script = {
+        fragment: jsString,
+        startLine: secondSection,
+        startChar,
+        endChar,
+      };
+    } else {
+      [startChar, endChar] = [endChar, endChar + cssString.length];
+      style = {
+        fragment: cssString,
+        startLine: secondSection,
+        startChar,
+        endChar,
+      };
+    }
+    endChar += htmlFragmentAdjusters[1];
+    [startChar, endChar] = [endChar, endChar + html.middle.length];
     if (stripEmptyStartEnd(html.middle) !== '') {
-      htmlFragments.push({fragment: html.middle, startLine: thirdSection});
+      htmlFragments.push({
+        fragment: html.middle,
+        startLine: thirdSection,
+        startChar,
+        endChar,
+      });
     }
+    endChar += htmlFragmentAdjusters[2];
+    if (scriptFirst) {
+      [startChar, endChar] = [endChar, endChar + cssString.length];
+      style = {
+        fragment: cssString,
+        startLine: fourthSection,
+        startChar,
+        endChar,
+      };
+    } else {
+      [startChar, endChar] = [endChar, endChar + jsString.length];
+      script = {
+        fragment: jsString,
+        startLine: fourthSection,
+        startChar,
+        endChar,
+      };
+    }
+    endChar += htmlFragmentAdjusters[3];
+    [startChar, endChar] = [endChar, endChar + html.end.length];
     if (stripEmptyStartEnd(html.end) !== '') {
-      htmlFragments.push({fragment: html.end, startLine: fifthSection});
+      htmlFragments.push({
+        fragment: html.end,
+        startLine: fifthSection,
+        startChar,
+        endChar,
+      });
     }
-    style = {fragment: cssString, startLine: scriptFirst ? fourthSection : secondSection};
-    script = {fragment: jsString, startLine: scriptFirst ? secondSection : fourthSection};
   } else if (jsString || cssString) {
     const firstSection = 1;
-    const secondSection = firstSection + htmlFragmentLengths[0] + htmlFragmentAdjusters[0];
+    const secondSection = firstSection + htmlFragmentsLinesCount[0] + htmlFragmentAdjusters[0];
     const thirdSection = secondSection + (jsString ? jsLength : cssLength) + htmlFragmentAdjusters[1];
+    [startChar, endChar] = [endChar, endChar + html.start.length];
     if (stripEmptyStartEnd(html.start) !== '') {
-      htmlFragments.push({fragment: html.start, startLine: firstSection});
+      htmlFragments.push({
+        fragment: html.start,
+        startLine: firstSection,
+        startChar,
+        endChar,
+      });
     }
-    if (stripEmptyStartEnd(html.end) !== '') {
-      htmlFragments.push({fragment: html.end, startLine: thirdSection});
-    }
+    endChar += htmlFragmentAdjusters[0];
     if (jsString) {
-      script = {fragment: jsString, startLine: secondSection};
+      [startChar, endChar] = [endChar, endChar + jsString.length];
+      script = {
+        fragment: jsString,
+        startLine: secondSection,
+        startChar,
+        endChar,
+      };
     } else {
-      style = {fragment: cssString, startLine: secondSection};
+      [startChar, endChar] = [endChar, endChar + cssString.length];
+      style = {
+        fragment: cssString,
+        startLine: secondSection,
+        startChar,
+        endChar,
+      };
+    }
+    [startChar, endChar] = [endChar + htmlFragmentAdjusters[1], endChar + html.end.length + htmlFragmentAdjusters[1]];
+    if (stripEmptyStartEnd(html.end) !== '') {
+      htmlFragments.push({
+        fragment: html.end,
+        startLine: thirdSection,
+        startChar,
+        endChar,
+      });
     }
   } else if (stripEmptyStartEnd(splits[0]) !== '') {
-    htmlFragments.push({fragment: splits[0], startLine: 1});
+    htmlFragments.push({
+      fragment: splits[0],
+      startLine: 1,
+      startChar: 0,
+      endChar: splits[0].length,
+    });
   }
   if (htmlFragments.length > 0) {
     scriptInHTMLFragments = <SvelteCodeFragment []>htmlFragments.flatMap((fragment) => svelteJsParser(fragment)).filter((e) => e);
@@ -136,14 +224,13 @@ export function svelteJsParser(fragment: SvelteCodeFragment): SvelteCodeFragment
   if (ast.html.children) {
     return ast.html.children
       .flatMap(
-        (child) => (child.type === 'InlineComponent'
-          ? [
-            ...child.attributes.flatMap((attribute: TemplateNode) => getChildFragment(attribute, fragment.fragment)),
-            ...(child.children ? child.children.flatMap((attribute: TemplateNode) => getChildFragment(attribute, fragment.fragment)) : []),
-          ]
-          : getChildFragment(child, fragment.fragment)
-        )
-          .map((codeFragment: SvelteCodeFragment) => ({fragment: codeFragment.fragment, startLine: fragment.startLine + codeFragment.startLine - 1})),
+        (child) => getChildFragment(child, fragment.fragment)
+          .map((codeFragment: SvelteCodeFragment) => ({
+            fragment: codeFragment.fragment,
+            startLine: fragment.startLine + codeFragment.startLine - 1,
+            startChar: fragment.startChar + codeFragment.startChar,
+            endChar: fragment.startChar + codeFragment.endChar,
+          })),
       );
   }
   return undefined;
@@ -151,10 +238,15 @@ export function svelteJsParser(fragment: SvelteCodeFragment): SvelteCodeFragment
 
 function getChildFragment(child: TemplateNode, svelteFile: string): SvelteCodeFragment[] {
   if (['MustacheTag', 'RawMustacheTag'].includes(child.type)) {
-    return [{fragment: svelteFile.slice(child.expression.start, child.expression.end), startLine: child.expression.loc.start.line}];
+    return [{
+      fragment: svelteFile.slice(child.expression.start, child.expression.end),
+      startLine: child.expression.loc.start.line,
+      startChar: child.expression.start,
+      endChar: child.expression.end,
+    }];
   }
-  if (child.type === 'Element') {
-    const children: {fragment: string, startLine: number}[] | undefined = [];
+  if (['Element', 'InlineComponent'].includes(child.type)) {
+    const children: SvelteCodeFragment [] | undefined = [];
     child.attributes.forEach((attribute: TemplateNode) => {
       children.push(...getChildFragment(attribute, svelteFile));
     });
@@ -173,6 +265,8 @@ function getChildFragment(child: TemplateNode, svelteFile: string): SvelteCodeFr
       {
         fragment: svelteFile.slice(child.expression.start, child.expression.end),
         startLine: child.expression.loc.start.line,
+        startChar: child.expression.start,
+        endChar: child.expression.end,
       },
     ];
   }
@@ -181,6 +275,8 @@ function getChildFragment(child: TemplateNode, svelteFile: string): SvelteCodeFr
       {
         fragment: svelteFile.slice(child.expression.start, child.expression.end),
         startLine: child.expression.loc.start.line,
+        startChar: child.expression.start,
+        endChar: child.expression.end,
       },
       ...child.children!.flatMap((node) => getChildFragment(node, svelteFile)),
       ...(child.else ? child.else.children!.flatMap((node: TemplateNode) => getChildFragment(node, svelteFile)) : []),
@@ -191,6 +287,8 @@ function getChildFragment(child: TemplateNode, svelteFile: string): SvelteCodeFr
       {
         fragment: svelteFile.slice(child.expression.start, child.expression.end),
         startLine: child.expression.loc.start.line,
+        startChar: child.expression.start,
+        endChar: child.expression.end,
       },
       ...child.pending.children!.flatMap((node: TemplateNode) => getChildFragment(node, svelteFile)),
       ...child.then.children!.flatMap((node: TemplateNode) => getChildFragment(node, svelteFile)),
