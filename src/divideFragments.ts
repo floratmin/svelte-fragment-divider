@@ -24,7 +24,7 @@ function stripEmptyStartEnd(rawString: string): string {
 }
 
 function linesCount(multilineString: string): number {
-  return (multilineString.match(/\n/g) || '').length;
+  return (multilineString.match(/\r?\n/g) || '').length;
 }
 
 export function svelteFragmentDivider(file: string, fileName?: string): SvelteCodeFragments {
@@ -60,9 +60,9 @@ export function svelteFragmentDivider(file: string, fileName?: string): SvelteCo
             ? 1
             : 0
     ));
-    html.start = splits[0].replace(/\n$/, '');
-    html.middle = splits[1].replace(/(^\n|\n$)/g, '');
-    html.end = splits[2].replace(/^\n/, '');
+    html.start = splits[0].replace(/\r?\n$/, '');
+    html.middle = splits[1].replace(/(^\r?\n|\r?\n$)/g, '');
+    html.end = splits[2].replace(/^\r?\n/, '');
   } else if (jsString || cssString) {
     htmlFragmentAdjusters = splits.map((fragment, i) => (
       i === 0
@@ -73,12 +73,12 @@ export function svelteFragmentDivider(file: string, fileName?: string): SvelteCo
           ? 1
           : 0
     ));
-    html.start = splits[0].replace(/\n$/, '');
-    html.end = splits[1].replace(/^\n/, '');
+    html.start = splits[0].replace(/\r?\n$/, '');
+    html.end = splits[1].replace(/^\r?\n/, '');
   }
   const htmlFragmentLengths = [linesCount(html.start), linesCount(html.middle), linesCount(html.end)];
-  const jsLength = ((jsString || '').match(/\n/g) || '').length;
-  const cssLength = ((cssString || '').match(/\n/g) || '').length;
+  const jsLength = linesCount(jsString || '');
+  const cssLength = linesCount(cssString || '');
   const htmlFragments: SvelteCodeFragment[] = [];
   let scriptInHTMLFragments: SvelteCodeFragment[] = [];
   let style: SvelteCodeFragment | undefined;
