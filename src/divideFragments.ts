@@ -1,5 +1,5 @@
 import * as svelte from 'svelte/compiler';
-import { TemplateNode } from 'svelte/types/compiler/interfaces';
+import { TemplateNode, Ast } from 'svelte/types/compiler/interfaces';
 import { parse } from 'node-html-parser';
 
 export type SvelteCodeFragment = {
@@ -45,16 +45,19 @@ export function svelteFragmentDivider(file: string, fileName?: string): SvelteCo
   };
   const splits = secondSplit.flatMap((e) => e);
   const scriptFirst = secondSplit[0].length === 1;
-  if (jsString && cssString && splits.slice(1).some((split) => split.match(jsRegex) || split.match(cssRegex))) {
-    if ((!scriptFirst && splits[2].match(jsRegex)) || (scriptFirst && splits.slice(1).some((split) => split.match(jsRegex)))) {
-      throw new Error(`File ${`${fileName} `}contains content in <script>...</script> also as text. This is currently not supported.`);
-    } else if ((scriptFirst && splits[2].match(cssRegex)) || (!scriptFirst && splits.slice(1).some((split) => split.match(cssRegex)))) {
-      throw new Error(`File ${`${fileName} `}contains content in <style>...</style> also as text. This is currently not supported.`);
-    }
-  } else if (jsString && splits[1].match(jsRegex)) {
-    throw new Error(`File ${`${fileName} `}contains content in <script>...</script> also as text. This is currently not supported.`);
-  } else if (cssString && splits[1].match(cssRegex)) {
-    throw new Error(`File ${`${fileName} `}contains content in <style>...</style> also as text. This is currently not supported.`);
+  if (firstSplit.length > 2) {
+    throw new Error(
+      `File ${
+        fileName ? `${fileName} ` : ''
+      }contains content in <script>...</script> also as a string. Fixing this will probably lead to an 'Unterminated template literal' error.`,
+    );
+  }
+  if (secondSplit.some((split) => split.length > 2) || (secondSplit.length > 1 && secondSplit.every((split) => split.length === 2))) {
+    throw new Error(
+      `File ${
+        fileName ? `${fileName} ` : ''
+      }contains content in <style>...</style> also as a string. Fixing this will probably lead to an 'Unterminated template literal' error.`,
+    );
   }
   if (jsString && cssString) {
     htmlFragmentAdjusters = splits.flatMap((fragment, i) => (
@@ -220,7 +223,7 @@ export function svelteFragmentDivider(file: string, fileName?: string): SvelteCo
     });
   }
   if (htmlFragments.length > 0) {
-    scriptInHTMLFragments = <SvelteCodeFragment []>htmlFragments.flatMap((fragment) => svelteJsParser(fragment)).filter((e) => e);
+    scriptInHTMLFragments = <SvelteCodeFragment []>htmlFragments.flatMap((fragment) => svelteJsParser(fragment, fileName)).filter((e) => e);
   }
   return {
     ...(fileName ? {fileName} : {}),
@@ -231,19 +234,25 @@ export function svelteFragmentDivider(file: string, fileName?: string): SvelteCo
   };
 }
 
-export function svelteJsParser(fragment: SvelteCodeFragment): SvelteCodeFragment[] | undefined {
-  const ast = svelte.parse(fragment.fragment);
-  if (ast.html.children) {
-    return ast.html.children
-      .flatMap(
-        (child) => getChildFragment(child, fragment.fragment)
-          .map((codeFragment: SvelteCodeFragment) => ({
-            fragment: codeFragment.fragment,
-            startLine: fragment.startLine + codeFragment.startLine - 1,
-            startChar: fragment.startChar + codeFragment.startChar,
-            endChar: fragment.startChar + codeFragment.endChar,
-          })),
-      );
+export function svelteJsParser(fragment: SvelteCodeFragment, fileName?: string): SvelteCodeFragment[] | undefined {
+  let ast: Ast;
+  try {
+    ast = svelte.parse(fragment.fragment);
+    if (ast.html.children) {
+      return ast.html.children
+        .flatMap(
+          (child) => getChildFragment(child, fragment.fragment)
+            .map((codeFragment: SvelteCodeFragment) => ({
+              fragment: codeFragment.fragment,
+              startLine: fragment.startLine + codeFragment.startLine - 1,
+              startChar: fragment.startChar + codeFragment.startChar,
+              endChar: fragment.startChar + codeFragment.endChar,
+            })),
+        );
+    }
+  } catch (e) {
+    const errors = e.toString().split('\n');
+    throw new Error(`${errors[0]}${fileName ? ` in file ${fileName}` : ''}\n${errors[1]}`);
   }
   return undefined;
 }

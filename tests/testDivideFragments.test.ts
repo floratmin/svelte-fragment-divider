@@ -567,7 +567,7 @@ describe('Testing the proper division of svelte files', () => {
 });
 describe('Testing parsing of JavaScript in Svelte with HTML', () => {
   test('RawMustacheTag', () => {
-    const svelteFile = i`
+    const svelteFile = i`4yy
       <p>{@html 'Foo'}</p>
     `;
     expect(svelteFragmentDivider(svelteFile)).toEqual({
@@ -1344,5 +1344,53 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
         },
       ],
     });
+  });
+});
+describe('Testing error handling', () => {
+  test('Throws if content in <style></style> is repeated as string.', () => {
+    const svelteFile = i`
+      <p>{\`<style>p {color: black;}</style>\`}</p>
+
+      <style>p {color: black;}</style>
+
+      <script>
+          let style = '<style>p {color: black;}</style>';
+      </script>
+    `;
+    expect(() => svelteFragmentDivider(svelteFile))
+      .toThrowError(
+        'File contains content in <style>...</style> also as a string.'
+        + ' Fixing this will probably lead to an \'Unterminated template literal\' error.',
+      );
+  });
+  test('Throws if content in <script></script> is repeated as string.', () => {
+    const svelteFile = i`
+      <p>{\`<script>export let p;</script>\`}</p>
+
+      <style>p {color: black;}</style>
+
+      <script>export let p;</script>
+    `;
+    expect(() => svelteFragmentDivider(svelteFile))
+      .toThrowError(
+        'File contains content in <script>...</script> also as a string.'
+        + ' Fixing this will probably lead to an \'Unterminated template literal\' error.',
+      );
+  });
+  test('Throws if unterminated literal is in html.', () => {
+    const svelteFile = i`
+      <p>{\`<script></script>\`}</p>
+
+      <style>p {color: black;}</style>
+
+      <script>
+        export let p;
+      </script>
+    `;
+    expect(() => svelteFragmentDivider(svelteFile))
+      .toThrowError(i`
+        Unterminated template literal (1:5)
+        1: <p>{\`
+      `);
   });
 });
