@@ -45,13 +45,14 @@ we get the following object:
   htmlFragments: [
     {
       fragment: `
+
 <p>{'Foo'}</p>
 {#if ifCondition}
   <Component prop={bar}>{baz}</Component>
 {/if}
 `,
-      startLine: 10,
-      startChar: 111,
+      startLine: 9,
+      startChar: 110,
       endChar: 193
     },
   ],
@@ -81,7 +82,7 @@ we get the following object:
       endChar: 174
     },   
   ],     
-  script: {
+  script: { // can also be an array
     fragment: `<script lang="ts">\n  export let a: string;\n</script>`,
     startLine: 1,
     startChar: 0,

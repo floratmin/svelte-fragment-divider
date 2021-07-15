@@ -32,14 +32,15 @@ describe('Testing the proper division of svelte files', () => {
         {
           fragment: i`
           
+          
           <p>{'Foo'}</p>
 
           {#if ifCondition}
             <Component prop={bar}>{baz}</Component>
           {/if}
           `,
-          startLine: 10,
-          startChar: 111,
+          startLine: 9,
+          startChar: 110,
           endChar: 193,
         },
       ],
@@ -101,12 +102,13 @@ describe('Testing the proper division of svelte files', () => {
       htmlFragments: [
         {
           fragment: i`
+            
             <body>
               <p>{Foo}</p>
             </body>
             `,
-          startLine: 9,
-          startChar: 113,
+          startLine: 8,
+          startChar: 112,
           endChar: 142,
         },
       ],
@@ -142,6 +144,103 @@ describe('Testing the proper division of svelte files', () => {
       },
     });
   });
+  test('Typescript with module, style and HTML', () => {
+    const svelteFile = i`
+      <script type="module">
+        export async function load({fetch}: {fetch: Function}): Promise<{props: {foo: string}, status: number, error: Error}> {
+          const res = await fetch('/api');
+
+          if (res.ok) return {
+              props: await res.json(),
+            };
+
+          return {
+            status: res.status,
+            error: new Error(),
+          }
+        }
+      </script>
+      <script lang="ts">
+        export let foo: string;
+      </script>
+      <style lang="less">
+        p {
+          color: black;
+        }
+      </style>
+      <body>
+        <p>{Foo}</p>
+      </body>
+    `;
+    expect(svelteFragmentDivider(svelteFile)).toEqual({
+      htmlFragments: [
+        {
+          fragment: i`
+            
+            <body>
+              <p>{Foo}</p>
+            </body>
+            `,
+          startLine: 22,
+          startChar: 447,
+          endChar: 477,
+        },
+      ],
+      scriptInHTMLFragments: [
+        {
+          fragment: 'Foo',
+          startLine: 24,
+          startChar: 461,
+          endChar: 464,
+        },
+      ],
+      script: [
+        {
+          fragment: i`
+            <script type="module">
+              export async function load({fetch}: {fetch: Function}): Promise<{props: {foo: string}, status: number, error: Error}> {
+                const res = await fetch('/api');
+
+                if (res.ok) return {
+                    props: await res.json(),
+                  };
+
+                return {
+                  status: res.status,
+                  error: new Error(),
+                }
+              }
+            </script>
+            `,
+          startLine: 1,
+          startChar: 0,
+          endChar: 335,
+        },
+        {
+          fragment: i`
+            <script lang="ts">
+              export let foo: string;
+            </script>
+            `,
+          startLine: 15,
+          startChar: 336,
+          endChar: 390,
+        },
+      ],
+      style: {
+        fragment: i`
+          <style lang="less">
+            p {
+              color: black;
+            }
+          </style>
+          `,
+        startLine: 18,
+        startChar: 391,
+        endChar: 447,
+      },
+    });
+  });
   test('HTML, style, HTML, script, HTML', () => {
     const svelteFile = i`
       <p>{'Foo'}</p>
@@ -159,21 +258,21 @@ describe('Testing the proper division of svelte files', () => {
     expect(svelteFragmentDivider(svelteFile)).toEqual({
       htmlFragments: [
         {
-          fragment: "<p>{'Foo'}</p>",
+          fragment: "<p>{'Foo'}</p>\n",
           startLine: 1,
           startChar: 0,
-          endChar: 14,
+          endChar: 15,
         },
         {
-          fragment: "<p>{'Bar'}</p>",
-          startLine: 7,
-          startChar: 60,
-          endChar: 74,
+          fragment: "\n<p>{'Bar'}</p>\n",
+          startLine: 6,
+          startChar: 59,
+          endChar: 75,
         },
         {
-          fragment: "<p>{'Baz'}</p>",
-          startLine: 11,
-          startChar: 113,
+          fragment: "\n<p>{'Baz'}</p>",
+          startLine: 10,
+          startChar: 112,
           endChar: 127,
         },
       ],
@@ -315,9 +414,9 @@ describe('Testing the proper division of svelte files', () => {
     expect(svelteFragmentDivider(svelteFile)).toEqual({
       htmlFragments: [
         {
-          fragment: `<p>{'Foo'}</p>`,
-          startLine: 4,
-          startChar: 35,
+          fragment: `\n<p>{'Foo'}</p>`,
+          startLine: 3,
+          startChar: 34,
           endChar: 49,
         },
       ],
@@ -375,10 +474,10 @@ describe('Testing the proper division of svelte files', () => {
     expect(svelteFragmentDivider(svelteFile)).toEqual({
       htmlFragments: [
         {
-          fragment: `<p>{'Foo'}</p>`,
+          fragment: `<p>{'Foo'}</p>\n`,
           startLine: 1,
           startChar: 0,
-          endChar: 14,
+          endChar: 15,
         },
       ],
       scriptInHTMLFragments: [
@@ -532,9 +631,9 @@ describe('Testing the proper division of svelte files', () => {
     expect(svelteFragmentDivider(svelteFile)).toEqual({
       htmlFragments: [
         {
-          fragment: `\n<p>\n  {'Foo'}\n  {'Bar'}\n</p>\n`,
-          startLine: 4,
-          startChar: 38,
+          fragment: `\n\n<p>\n  {'Foo'}\n  {'Bar'}\n</p>\n`,
+          startLine: 3,
+          startChar: 37,
           endChar: 68,
         },
       ],
@@ -1347,36 +1446,6 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
   });
 });
 describe('Testing error handling', () => {
-  test('Throws if content in <style></style> is repeated as string.', () => {
-    const svelteFile = i`
-      <p>{\`<style>p {color: black;}</style>\`}</p>
-
-      <style>p {color: black;}</style>
-
-      <script>
-          let style = '<style>p {color: black;}</style>';
-      </script>
-    `;
-    expect(() => svelteFragmentDivider(svelteFile))
-      .toThrowError(
-        'File contains content in <style>...</style> also as a string.'
-        + ' Fixing this will probably lead to an \'Unterminated template literal\' error.',
-      );
-  });
-  test('Throws if content in <script></script> is repeated as string.', () => {
-    const svelteFile = i`
-      <p>{\`<script>export let p;</script>\`}</p>
-
-      <style>p {color: black;}</style>
-
-      <script>export let p;</script>
-    `;
-    expect(() => svelteFragmentDivider(svelteFile))
-      .toThrowError(
-        'File contains content in <script>...</script> also as a string.'
-        + ' Fixing this will probably lead to an \'Unterminated template literal\' error.',
-      );
-  });
   test('Throws if unterminated literal is in html.', () => {
     const svelteFile = i`
       <p>{\`<script></script>\`}</p>

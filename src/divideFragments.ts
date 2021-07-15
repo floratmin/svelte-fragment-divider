@@ -11,7 +11,7 @@ export type SvelteCodeFragment = {
 
 export type SvelteCodeFragments = {
   fileName?: string | undefined;
-  script?: SvelteCodeFragment | undefined;
+  script?: SvelteCodeFragment | SvelteCodeFragment[] | undefined;
   style?: SvelteCodeFragment | undefined;
   htmlFragments?: SvelteCodeFragment[] | undefined;
   scriptInHTMLFragments?: SvelteCodeFragment[] | undefined;
@@ -31,206 +31,56 @@ function linesCount(multilineString: string): number {
 
 export function svelteFragmentDivider(file: string, fileName?: string): SvelteCodeFragments {
   const svelteFileRoot = parse(file);
-  const jsString = svelteFileRoot.querySelector('script')?.toString();
+  const jsStrings = svelteFileRoot.querySelectorAll('script')?.map((script) => script.toString());
   const cssString = svelteFileRoot.querySelector('style')?.toString();
-  const jsRegex = jsString && new RegExp(escapeRegExp(jsString));
+  const jsRegExs = jsStrings && jsStrings.map((jsString) => new RegExp(escapeRegExp(jsString)));
   const cssRegex = cssString && new RegExp(escapeRegExp(cssString));
-  const firstSplit = jsRegex ? file.split(jsRegex) : [file];
-  const secondSplit = cssRegex ? firstSplit.map((split) => split.split(cssRegex)) : [firstSplit];
-  let htmlFragmentAdjusters: number[] = [];
-  const html = {
-    start: '',
-    middle: '',
-    end: '',
+  const jsMatchs = jsRegExs.map((jsRegEx) => jsRegEx && file.match(jsRegEx));
+  const cssMatch = cssRegex && file.match(cssRegex);
+  const allMatchs = <RegExpMatchArray []>[...jsMatchs, cssMatch].filter(Boolean);
+  const positions = allMatchs
+    .map((match) => [<number>match.index, <number>match.index + match[0].length])
+    .sort((a, b) => a[0] - b[0]);
+  positions.unshift([-Infinity, 0]);
+  positions.push([file.length, Infinity]);
+  const htmlPositions: number[][] = [];
+  positions.slice(0, -1).forEach(([, end], i) => {
+    if (end !== positions[i + 1][0]) {
+      htmlPositions.push([end, positions[i + 1][0]]);
+    }
+  });
+  const script = (<RegExpMatchArray []>jsMatchs.filter(Boolean)).map((match) => ({
+    fragment: match[0],
+    startLine: linesCount(file.slice(0, <number>match.index)) + 1,
+    startChar: <number>match.index,
+    endChar: <number>match.index + match[0].length,
+  }));
+  const style = cssMatch && {
+    fragment: cssMatch[0],
+    startLine: linesCount(file.slice(0, <number>cssMatch.index)) + 1,
+    startChar: <number>cssMatch.index,
+    endChar: <number>cssMatch.index + cssMatch[0].length,
   };
-  const splits = secondSplit.flatMap((e) => e);
-  const scriptFirst = secondSplit[0].length === 1;
-  if (firstSplit.length > 2) {
-    throw new Error(
-      `File ${
-        fileName ? `${fileName} ` : ''
-      }contains content in <script>...</script> also as a string. Fixing this will probably lead to an 'Unterminated template literal' error.`,
-    );
-  }
-  if (secondSplit.some((split) => split.length > 2) || (secondSplit.length > 1 && secondSplit.every((split) => split.length === 2))) {
-    throw new Error(
-      `File ${
-        fileName ? `${fileName} ` : ''
-      }contains content in <style>...</style> also as a string. Fixing this will probably lead to an 'Unterminated template literal' error.`,
-    );
-  }
-  if (jsString && cssString) {
-    htmlFragmentAdjusters = splits.flatMap((fragment, i) => (
-      i === 0
-        ? fragment.slice(-1) === '\n'
-          ? 1
-          : 0
-        : i === 1
-          ? fragment !== '\n' && fragment.slice(0, 1) === '\n' && fragment.slice(-1) === '\n'
-            ? [1, 1]
-            : fragment.slice(0, 1) === '\n'
-              ? [1, 0]
-              : fragment.slice(-1) === '\n'
-                ? [0, 1]
-                : [0, 0]
-          : fragment.slice(0, 1) === '\n'
-            ? 1
-            : 0
-    ));
-    html.start = splits[0].replace(/\r?\n$/, '');
-    html.middle = splits[1].replace(/(^\r?\n|\r?\n$)/g, '');
-    html.end = splits[2].replace(/^\r?\n/, '');
-  } else if (jsString || cssString) {
-    htmlFragmentAdjusters = splits.map((fragment, i) => (
-      i === 0
-        ? fragment.slice(-1) === '\n'
-          ? 1
-          : 0
-        : fragment.slice(0, 1) === '\n'
-          ? 1
-          : 0
-    ));
-    html.start = splits[0].replace(/\r?\n$/, '');
-    html.end = splits[1].replace(/^\r?\n/, '');
-  }
-  const htmlFragmentsLinesCount = [linesCount(html.start), linesCount(html.middle), linesCount(html.end)];
-  const jsLength = linesCount(jsString || '');
-  const cssLength = linesCount(cssString || '');
-  const htmlFragments: SvelteCodeFragment[] = [];
-  let scriptInHTMLFragments: SvelteCodeFragment[] = [];
-  let style: SvelteCodeFragment | undefined;
-  let script: SvelteCodeFragment | undefined;
-  let endChar = 0;
-  let startChar: number;
-  if (jsString && cssString) {
-    const firstSection = 1;
-    const secondSection = firstSection + htmlFragmentsLinesCount[0] + htmlFragmentAdjusters[0];
-    const thirdSection = secondSection + (scriptFirst ? jsLength : cssLength) + htmlFragmentAdjusters[1];
-    const fourthSection = thirdSection + htmlFragmentsLinesCount[1] + htmlFragmentAdjusters[2];
-    const fifthSection = fourthSection + (scriptFirst ? cssLength : jsLength) + htmlFragmentAdjusters[3];
-    [startChar, endChar] = [endChar, endChar + html.start.length];
-    if (stripEmptyStartEnd(html.start) !== '') {
-      htmlFragments.push({
-        fragment: html.start,
-        startLine: firstSection,
-        startChar,
-        endChar,
-      });
-    }
-    endChar += htmlFragmentAdjusters[0];
-    if (scriptFirst) {
-      [startChar, endChar] = [endChar, endChar + jsString.length];
-      script = {
-        fragment: jsString,
-        startLine: secondSection,
-        startChar,
-        endChar,
-      };
-    } else {
-      [startChar, endChar] = [endChar, endChar + cssString.length];
-      style = {
-        fragment: cssString,
-        startLine: secondSection,
-        startChar,
-        endChar,
-      };
-    }
-    endChar += htmlFragmentAdjusters[1];
-    [startChar, endChar] = [endChar, endChar + html.middle.length];
-    if (stripEmptyStartEnd(html.middle) !== '') {
-      htmlFragments.push({
-        fragment: html.middle,
-        startLine: thirdSection,
-        startChar,
-        endChar,
-      });
-    }
-    endChar += htmlFragmentAdjusters[2];
-    if (scriptFirst) {
-      [startChar, endChar] = [endChar, endChar + cssString.length];
-      style = {
-        fragment: cssString,
-        startLine: fourthSection,
-        startChar,
-        endChar,
-      };
-    } else {
-      [startChar, endChar] = [endChar, endChar + jsString.length];
-      script = {
-        fragment: jsString,
-        startLine: fourthSection,
-        startChar,
-        endChar,
-      };
-    }
-    endChar += htmlFragmentAdjusters[3];
-    [startChar, endChar] = [endChar, endChar + html.end.length];
-    if (stripEmptyStartEnd(html.end) !== '') {
-      htmlFragments.push({
-        fragment: html.end,
-        startLine: fifthSection,
-        startChar,
-        endChar,
-      });
-    }
-  } else if (jsString || cssString) {
-    const firstSection = 1;
-    const secondSection = firstSection + htmlFragmentsLinesCount[0] + htmlFragmentAdjusters[0];
-    const thirdSection = secondSection + (jsString ? jsLength : cssLength) + htmlFragmentAdjusters[1];
-    [startChar, endChar] = [endChar, endChar + html.start.length];
-    if (stripEmptyStartEnd(html.start) !== '') {
-      htmlFragments.push({
-        fragment: html.start,
-        startLine: firstSection,
-        startChar,
-        endChar,
-      });
-    }
-    endChar += htmlFragmentAdjusters[0];
-    if (jsString) {
-      [startChar, endChar] = [endChar, endChar + jsString.length];
-      script = {
-        fragment: jsString,
-        startLine: secondSection,
-        startChar,
-        endChar,
-      };
-    } else {
-      [startChar, endChar] = [endChar, endChar + cssString.length];
-      style = {
-        fragment: cssString,
-        startLine: secondSection,
-        startChar,
-        endChar,
-      };
-    }
-    endChar += htmlFragmentAdjusters[1];
-    [startChar, endChar] = [endChar, endChar + html.end.length];
-    if (stripEmptyStartEnd(html.end) !== '') {
-      htmlFragments.push({
-        fragment: html.end,
-        startLine: thirdSection,
-        startChar,
-        endChar,
-      });
-    }
-  } else if (stripEmptyStartEnd(splits[0]) !== '') {
-    htmlFragments.push({
-      fragment: splits[0],
-      startLine: 1,
-      startChar: 0,
-      endChar: splits[0].length,
-    });
-  }
-  if (htmlFragments.length > 0) {
-    scriptInHTMLFragments = <SvelteCodeFragment []>htmlFragments.flatMap((fragment) => svelteJsParser(fragment, fileName)).filter((e) => e);
-  }
+  const htmlFragments = htmlPositions
+    .map(([start, end]) => <[number, number, string]>[start, end, file.slice(start, end)])
+    .filter(([,, htmlFragment]) => stripEmptyStartEnd(htmlFragment) !== '')
+    .map(([startChar, endChar, htmlFragment]) => ({
+      fragment: htmlFragment,
+      startLine: linesCount(file.slice(0, startChar)) + 1,
+      startChar,
+      endChar,
+    }));
+  const scriptInHTMLFragments = htmlFragments.length > 0
+    ? <SvelteCodeFragment []>htmlFragments
+      .flatMap((fragment) => svelteJsParser(fragment, fileName))
+      .filter((e) => e)
+    : undefined;
   return {
     ...(fileName ? {fileName} : {}),
     ...(htmlFragments.length > 0 ? {htmlFragments} : {}),
-    ...(script ? {script} : {}),
-    ...(style ? {style} : {}),
-    ...(scriptInHTMLFragments.length > 0 ? {scriptInHTMLFragments} : {}),
+    ...(script.length > 0 ? script.length > 1 ? {script} : {script: script[0]} : {}),
+    ...(style && style.fragment !== '' ? {style} : {}),
+    ...(scriptInHTMLFragments && scriptInHTMLFragments.length > 0 ? {scriptInHTMLFragments} : {}),
   };
 }
 
