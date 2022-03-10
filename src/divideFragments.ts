@@ -100,7 +100,7 @@ export function svelteJsParser(fragment: SvelteCodeFragment, fileName?: string):
             })),
         );
     }
-  } catch (e) {
+  } catch (e: any) {
     const errors = e.toString().split('\n');
     throw new Error(`${errors[0]}${fileName ? ` in file ${fileName}` : ''}\n${errors[1]}`);
   }
