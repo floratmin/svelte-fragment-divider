@@ -4,7 +4,10 @@ import { svelteFragmentDivider } from '../src';
 function i(strings: TemplateStringsArray) {
   const stringArray = strings[0].split('\n');
   const indentation = stringArray[1].match(/\s*/g)![0].length;
-  return stringArray.slice(1, -1).map((string) => string.slice(indentation)).join('\n');
+  return stringArray
+    .slice(1, -1)
+    .map((string) => string.slice(indentation))
+    .join('\n');
 }
 
 describe('Testing the proper division of svelte files', () => {
@@ -278,19 +281,19 @@ describe('Testing the proper division of svelte files', () => {
       ],
       scriptInHTMLFragments: [
         {
-          fragment: '\'Foo\'',
+          fragment: "'Foo'",
           startLine: 1,
           startChar: 4,
           endChar: 9,
         },
         {
-          fragment: '\'Bar\'',
+          fragment: "'Bar'",
           startLine: 7,
           startChar: 64,
           endChar: 69,
         },
         {
-          fragment: '\'Baz\'',
+          fragment: "'Baz'",
           startLine: 11,
           startChar: 117,
           endChar: 122,
@@ -347,19 +350,19 @@ describe('Testing the proper division of svelte files', () => {
       ],
       scriptInHTMLFragments: [
         {
-          fragment: '\'Foo\'',
+          fragment: "'Foo'",
           startLine: 1,
           startChar: 4,
           endChar: 9,
         },
         {
-          fragment: '\'Bar\'',
+          fragment: "'Bar'",
           startLine: 1,
           startChar: 48,
           endChar: 53,
         },
         {
-          fragment: '\'Baz\'',
+          fragment: "'Baz'",
           startLine: 1,
           startChar: 93,
           endChar: 98,
@@ -422,7 +425,7 @@ describe('Testing the proper division of svelte files', () => {
       ],
       scriptInHTMLFragments: [
         {
-          fragment: '\'Foo\'',
+          fragment: "'Foo'",
           startLine: 4,
           startChar: 39,
           endChar: 44,
@@ -455,7 +458,7 @@ describe('Testing the proper division of svelte files', () => {
       ],
       scriptInHTMLFragments: [
         {
-          fragment: '\'Foo\'',
+          fragment: "'Foo'",
           startLine: 1,
           startChar: 4,
           endChar: 9,
@@ -482,7 +485,7 @@ describe('Testing the proper division of svelte files', () => {
       ],
       scriptInHTMLFragments: [
         {
-          fragment: '\'Foo\'',
+          fragment: "'Foo'",
           startLine: 1,
           startChar: 4,
           endChar: 9,
@@ -566,13 +569,13 @@ describe('Testing the proper division of svelte files', () => {
       ],
       scriptInHTMLFragments: [
         {
-          fragment: '\'Foo\'',
+          fragment: "'Foo'",
           startLine: 1,
           startChar: 4,
           endChar: 9,
         },
         {
-          fragment: '\'Bar\'',
+          fragment: "'Bar'",
           startLine: 5,
           startChar: 62,
           endChar: 67,
@@ -639,13 +642,13 @@ describe('Testing the proper division of svelte files', () => {
       ],
       scriptInHTMLFragments: [
         {
-          fragment: '\'Foo\'',
+          fragment: "'Foo'",
           startLine: 6,
           startChar: 46,
           endChar: 51,
         },
         {
-          fragment: '\'Bar\'',
+          fragment: "'Bar'",
           startLine: 7,
           startChar: 56,
           endChar: 61,
@@ -680,7 +683,7 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
       ],
       scriptInHTMLFragments: [
         {
-          fragment: '\'Foo\'',
+          fragment: "'Foo'",
           startLine: 1,
           startChar: 10,
           endChar: 15,
@@ -703,7 +706,7 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
       ],
       scriptInHTMLFragments: [
         {
-          fragment: '\'Foo\'',
+          fragment: "'Foo'",
           startLine: 1,
           startChar: 23,
           endChar: 28,
@@ -727,25 +730,25 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
       ],
       scriptInHTMLFragments: [
         {
-          fragment: '\'Foo\'',
+          fragment: "'Foo'",
           startLine: 1,
           startChar: 23,
           endChar: 28,
         },
         {
-          fragment: '\'Bar\'',
+          fragment: "'Bar'",
           startLine: 1,
           startChar: 31,
           endChar: 36,
         },
         {
-          fragment: '\'Baz\'',
+          fragment: "'Baz'",
           startLine: 2,
           startChar: 74,
           endChar: 79,
         },
         {
-          fragment: '\'Bax\'',
+          fragment: "'Bax'",
           startLine: 2,
           startChar: 85,
           endChar: 90,
@@ -769,25 +772,25 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
       ],
       scriptInHTMLFragments: [
         {
-          fragment: '\'Foo\'',
+          fragment: "'Foo'",
           startLine: 1,
           startChar: 27,
           endChar: 32,
         },
         {
-          fragment: '\'Bar\'',
+          fragment: "'Bar'",
           startLine: 1,
           startChar: 35,
           endChar: 40,
         },
         {
-          fragment: '\'Baz\'',
+          fragment: "'Baz'",
           startLine: 2,
           startChar: 82,
           endChar: 87,
         },
         {
-          fragment: '\'Bax\'',
+          fragment: "'Bax'",
           startLine: 2,
           startChar: 93,
           endChar: 98,
@@ -811,25 +814,25 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
       ],
       scriptInHTMLFragments: [
         {
-          fragment: '\'Foo\'',
+          fragment: "'Foo'",
           startLine: 1,
           startChar: 22,
           endChar: 27,
         },
         {
-          fragment: '\'Bar\'',
+          fragment: "'Bar'",
           startLine: 1,
           startChar: 30,
           endChar: 35,
         },
         {
-          fragment: '\'Baz\'',
+          fragment: "'Baz'",
           startLine: 2,
           startChar: 72,
           endChar: 77,
         },
         {
-          fragment: '\'Bax\'',
+          fragment: "'Bax'",
           startLine: 2,
           startChar: 83,
           endChar: 88,
@@ -853,25 +856,25 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
       ],
       scriptInHTMLFragments: [
         {
-          fragment: '\'Foo\'',
+          fragment: "'Foo'",
           startLine: 1,
           startChar: 27,
           endChar: 32,
         },
         {
-          fragment: '\'Bar\'',
+          fragment: "'Bar'",
           startLine: 1,
           startChar: 35,
           endChar: 40,
         },
         {
-          fragment: '\'Baz\'',
+          fragment: "'Baz'",
           startLine: 2,
           startChar: 82,
           endChar: 87,
         },
         {
-          fragment: '\'Bax\'',
+          fragment: "'Bax'",
           startLine: 2,
           startChar: 93,
           endChar: 98,
@@ -902,49 +905,49 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
       ],
       scriptInHTMLFragments: [
         {
-          fragment: '\'Foo\'',
+          fragment: "'Foo'",
           startLine: 1,
           startChar: 19,
           endChar: 24,
         },
         {
-          fragment: '\'Bar\'',
+          fragment: "'Bar'",
           startLine: 1,
           startChar: 27,
           endChar: 32,
         },
         {
-          fragment: '\'Baz\'',
+          fragment: "'Baz'",
           startLine: 2,
           startChar: 66,
           endChar: 71,
         },
         {
-          fragment: '\'Bax\'',
+          fragment: "'Bax'",
           startLine: 2,
           startChar: 77,
           endChar: 82,
         },
         {
-          fragment: '\'Foo2\'',
+          fragment: "'Foo2'",
           startLine: 3,
           startChar: 126,
           endChar: 132,
         },
         {
-          fragment: '\'Bar2\'',
+          fragment: "'Bar2'",
           startLine: 3,
           startChar: 135,
           endChar: 141,
         },
         {
-          fragment: '\'Baz2\'',
+          fragment: "'Baz2'",
           startLine: 4,
           startChar: 182,
           endChar: 188,
         },
         {
-          fragment: '\'Bax2\'',
+          fragment: "'Bax2'",
           startLine: 4,
           startChar: 194,
           endChar: 200,
@@ -968,25 +971,25 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
       ],
       scriptInHTMLFragments: [
         {
-          fragment: '\'Foo\'',
+          fragment: "'Foo'",
           startLine: 1,
           startChar: 24,
           endChar: 29,
         },
         {
-          fragment: '\'Bar\'',
+          fragment: "'Bar'",
           startLine: 1,
           startChar: 32,
           endChar: 37,
         },
         {
-          fragment: '\'Baz\'',
+          fragment: "'Baz'",
           startLine: 2,
           startChar: 76,
           endChar: 81,
         },
         {
-          fragment: '\'Bax\'',
+          fragment: "'Bax'",
           startLine: 2,
           startChar: 87,
           endChar: 92,
@@ -1010,25 +1013,25 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
       ],
       scriptInHTMLFragments: [
         {
-          fragment: '\'Foo\'',
+          fragment: "'Foo'",
           startLine: 1,
           startChar: 29,
           endChar: 34,
         },
         {
-          fragment: '\'Bar\'',
+          fragment: "'Bar'",
           startLine: 1,
           startChar: 37,
           endChar: 42,
         },
         {
-          fragment: '\'Baz\'',
+          fragment: "'Baz'",
           startLine: 2,
           startChar: 86,
           endChar: 91,
         },
         {
-          fragment: '\'Bax\'',
+          fragment: "'Bax'",
           startLine: 2,
           startChar: 97,
           endChar: 102,
@@ -1052,25 +1055,25 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
       ],
       scriptInHTMLFragments: [
         {
-          fragment: '\'Foo\'',
+          fragment: "'Foo'",
           startLine: 1,
           startChar: 26,
           endChar: 31,
         },
         {
-          fragment: '\'Bar\'',
+          fragment: "'Bar'",
           startLine: 1,
           startChar: 34,
           endChar: 39,
         },
         {
-          fragment: '\'Baz\'',
+          fragment: "'Baz'",
           startLine: 2,
           startChar: 80,
           endChar: 85,
         },
         {
-          fragment: '\'Bax\'',
+          fragment: "'Bax'",
           startLine: 2,
           startChar: 91,
           endChar: 96,
@@ -1094,25 +1097,25 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
       ],
       scriptInHTMLFragments: [
         {
-          fragment: '\'Foo\'',
+          fragment: "'Foo'",
           startLine: 1,
           startChar: 26,
           endChar: 31,
         },
         {
-          fragment: '\'Bar\'',
+          fragment: "'Bar'",
           startLine: 1,
           startChar: 34,
           endChar: 39,
         },
         {
-          fragment: '\'Baz\'',
+          fragment: "'Baz'",
           startLine: 2,
           startChar: 80,
           endChar: 85,
         },
         {
-          fragment: '\'Bax\'',
+          fragment: "'Bax'",
           startLine: 2,
           startChar: 91,
           endChar: 96,
@@ -1171,7 +1174,7 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
           endChar: 16,
         },
         {
-          fragment: '\'Foo\'',
+          fragment: "'Foo'",
           startLine: 2,
           startChar: 21,
           endChar: 26,
@@ -1183,13 +1186,13 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
           endChar: 51,
         },
         {
-          fragment: '\'Foo2\'',
+          fragment: "'Foo2'",
           startLine: 5,
           startChar: 56,
           endChar: 62,
         },
         {
-          fragment: '\'Bar2\'',
+          fragment: "'Bar2'",
           startLine: 7,
           startChar: 75,
           endChar: 81,
@@ -1201,7 +1204,7 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
           endChar: 106,
         },
         {
-          fragment: '\'Foo3\'',
+          fragment: "'Foo3'",
           startLine: 10,
           startChar: 111,
           endChar: 117,
@@ -1213,13 +1216,13 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
           endChar: 145,
         },
         {
-          fragment: '\'Bar3\'',
+          fragment: "'Bar3'",
           startLine: 12,
           startChar: 150,
           endChar: 156,
         },
         {
-          fragment: '\'Baz3\'',
+          fragment: "'Baz3'",
           startLine: 14,
           startChar: 169,
           endChar: 175,
@@ -1264,7 +1267,7 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
           endChar: 16,
         },
         {
-          fragment: '\'Foo\'',
+          fragment: "'Foo'",
           startLine: 2,
           startChar: 26,
           endChar: 31,
@@ -1276,13 +1279,13 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
           endChar: 58,
         },
         {
-          fragment: '\'Foo2\'',
+          fragment: "'Foo2'",
           startLine: 5,
           startChar: 68,
           endChar: 74,
         },
         {
-          fragment: '\'Bar2\'',
+          fragment: "'Bar2'",
           startLine: 7,
           startChar: 87,
           endChar: 93,
@@ -1317,7 +1320,7 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
           endChar: 14,
         },
         {
-          fragment: '\'Foo\'',
+          fragment: "'Foo'",
           startLine: 2,
           startChar: 19,
           endChar: 24,
@@ -1382,19 +1385,19 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
           endChar: 15,
         },
         {
-          fragment: '\'Foo\'',
+          fragment: "'Foo'",
           startLine: 2,
           startChar: 20,
           endChar: 25,
         },
         {
-          fragment: '\'Bar\'',
+          fragment: "'Bar'",
           startLine: 4,
           startChar: 43,
           endChar: 48,
         },
         {
-          fragment: '\'Baz\'',
+          fragment: "'Baz'",
           startLine: 6,
           startChar: 67,
           endChar: 72,
@@ -1406,13 +1409,13 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
           endChar: 99,
         },
         {
-          fragment: '\'Foo2\'',
+          fragment: "'Foo2'",
           startLine: 9,
           startChar: 104,
           endChar: 110,
         },
         {
-          fragment: '\'Bar2\'',
+          fragment: "'Bar2'",
           startLine: 11,
           startChar: 128,
           endChar: 134,
@@ -1424,7 +1427,7 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
           endChar: 161,
         },
         {
-          fragment: '\'Foo3\'',
+          fragment: "'Foo3'",
           startLine: 14,
           startChar: 176,
           endChar: 182,
@@ -1436,7 +1439,7 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
           endChar: 209,
         },
         {
-          fragment: '\'Foo4\'',
+          fragment: "'Foo4'",
           startLine: 17,
           startChar: 225,
           endChar: 231,
@@ -1456,8 +1459,7 @@ describe('Testing error handling', () => {
         export let p;
       </script>
     `;
-    expect(() => svelteFragmentDivider(svelteFile))
-      .toThrowError(i`
+    expect(() => svelteFragmentDivider(svelteFile)).toThrowError(i`
         Unterminated template literal (1:5)
         1: <p>{\`
       `);
