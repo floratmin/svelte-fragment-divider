@@ -20,7 +20,9 @@
     "prettier": "prettier --config .prettierrc.js '{src,tests}/**/*.ts'",
     "prettier:format": "prettier --config .prettierrc.js '{src,tests}/**/*.ts' --write",
     "test": "jest --config jest.config.ts",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "publish": "npm publish",
+    "publish:inspect": "npm pack --dry-run"
   },
   "repository": {
     "type": "git",
