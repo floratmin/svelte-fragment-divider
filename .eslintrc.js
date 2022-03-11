@@ -15,7 +15,7 @@ module.exports = {
       },
       rules: {
         '@typescript-eslint/quotes': 'off',
-      }
+      },
     },
   ],
   parser: '@typescript-eslint/parser',
@@ -27,8 +27,8 @@ module.exports = {
     'prettier',
   ],
   extends: [
-    'prettier',
     'airbnb-typescript',
+    'prettier',
   ],
   rules: {
     'prettier/prettier': 2,
