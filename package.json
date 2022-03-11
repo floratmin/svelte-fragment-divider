@@ -15,10 +15,11 @@
   "scripts": {
     "watch": "tsc -w -p src/",
     "build": "tsc -p src/",
-    "lint": "eslint .",
+    "lint": "eslint '{src,tests}/**/*.ts'",
+    "lint:format": "eslint --fix '{src,tests}/**/*.ts'",
+    "prettier": "prettier --config .prettierrc.js '{src,tests}/**/*.ts'",
     "prettier:format": "prettier --config .prettierrc.js '{src,tests}/**/*.ts' --write",
-    "test": "jest --config jest.config.ts",
-    "lint:test": "eslint tests/"
+    "test": "jest --config jest.config.ts"
   },
   "repository": {
     "type": "git",
