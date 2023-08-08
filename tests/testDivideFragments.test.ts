@@ -756,6 +756,21 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
       ],
     });
   });
+  test('Element with shortcut attribute', () => {
+    const svelteFile = i`
+      <Compontent {attribute} />
+    `;
+    expect(svelteFragmentDivider(svelteFile)).toEqual({
+      htmlFragments: [
+        {
+          fragment: `<Compontent {attribute} />`,
+          startLine: 1,
+          startChar: 0,
+          endChar: 26,
+        },
+      ],
+    });
+  });
   test('Binding', () => {
     const svelteFile = i`
       <Compontent bind:property={'Foo'}>{'Bar'}</Compontent>
@@ -794,6 +809,21 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
           startLine: 2,
           startChar: 93,
           endChar: 98,
+        },
+      ],
+    });
+  });
+  test('Binding shortcut (#1)', () => {
+    const svelteFile = i`
+      <Compontent bind:value></Compontent>
+    `;
+    expect(svelteFragmentDivider(svelteFile)).toEqual({
+      htmlFragments: [
+        {
+          endChar: 36,
+          fragment: `<Compontent bind:value></Compontent>`,
+          startChar: 0,
+          startLine: 1,
         },
       ],
     });
