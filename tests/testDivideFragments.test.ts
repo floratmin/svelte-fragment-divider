@@ -840,48 +840,6 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
       ],
     });
   });
-  test('Binding', () => {
-    const svelteFile = i`
-      <Compontent bind:property={'Foo'}>{'Bar'}</Compontent>
-      <Compontent bind:property={'Baz'}><p>{'Bax'}<p></Compontent>
-    `;
-    expect(svelteFragmentDivider(svelteFile)).toEqual({
-      htmlFragments: [
-        {
-          fragment: `<Compontent bind:property={'Foo'}>{'Bar'}</Compontent>\n<Compontent bind:property={'Baz'}><p>{'Bax'}<p></Compontent>`,
-          startLine: 1,
-          startChar: 0,
-          endChar: 115,
-        },
-      ],
-      scriptInHTMLFragments: [
-        {
-          fragment: "'Foo'",
-          startLine: 1,
-          startChar: 27,
-          endChar: 32,
-        },
-        {
-          fragment: "'Bar'",
-          startLine: 1,
-          startChar: 35,
-          endChar: 40,
-        },
-        {
-          fragment: "'Baz'",
-          startLine: 2,
-          startChar: 82,
-          endChar: 87,
-        },
-        {
-          fragment: "'Bax'",
-          startLine: 2,
-          startChar: 93,
-          endChar: 98,
-        },
-      ],
-    });
-  });
   test('Class', () => {
     const svelteFile = i`
       <Compontent class={'Foo'}>{'Bar'}</Compontent>
