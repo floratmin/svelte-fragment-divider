@@ -95,7 +95,11 @@ export function svelteJsParser(fragment: SvelteCodeFragment, fileName?: string):
     }
   } catch (e: any) {
     const errors = e.toString().split('\n');
-    throw new Error(`${errors[0]}${fileName ? ` in file ${fileName}` : ''}\n${errors[1]}`);
+    if (errors.length > 1) {
+      throw new Error(`${errors[0]}${fileName ? ` in file ${fileName}` : ''}\n${errors[1]}`);
+    } else {
+      throw e;
+    }
   }
   return undefined;
 }
@@ -126,7 +130,25 @@ function getChildFragment(child: TemplateNode, svelteFile: string): SvelteCodeFr
   if (child.type === 'Attribute') {
     return child.value.flatMap((node: TemplateNode) => getChildFragment(node, svelteFile));
   }
-  if (['Binding', 'EventHandler', 'Class', 'Action', 'Transition', 'Animation', 'Let'].includes(child.type)) {
+  if (['Binding'].includes(child.type)) {
+    if (child.expression.type === 'Literal') {
+      /* Example:
+       * <input bind:value="value" /> */
+      return [
+        {
+          fragment: svelteFile.slice(child.expression.start, child.expression.end),
+          startLine: child.expression.loc.start.line,
+          startChar: child.expression.start,
+          endChar: child.expression.end,
+        },
+      ];
+    } else if (child.expression.type === 'Identifier') {
+      /* Example:
+       * <input bind:value /> */
+      // We don't return "Identifiers". Nothing to do here!
+    }
+  }
+  if (['EventHandler', 'Class', 'Action', 'Transition', 'Animation', 'Let'].includes(child.type)) {
     return [
       {
         fragment: svelteFile.slice(child.expression.start, child.expression.end),

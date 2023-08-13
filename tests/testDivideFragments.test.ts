@@ -756,6 +756,21 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
       ],
     });
   });
+  test('Element with shortcut attribute', () => {
+    const svelteFile = i`
+      <Compontent {attribute} />
+    `;
+    expect(svelteFragmentDivider(svelteFile)).toEqual({
+      htmlFragments: [
+        {
+          fragment: `<Compontent {attribute} />`,
+          startLine: 1,
+          startChar: 0,
+          endChar: 26,
+        },
+      ],
+    });
+  });
   test('Binding', () => {
     const svelteFile = i`
       <Compontent bind:property={'Foo'}>{'Bar'}</Compontent>
@@ -794,6 +809,21 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
           startLine: 2,
           startChar: 93,
           endChar: 98,
+        },
+      ],
+    });
+  });
+  test('Binding shortcut (#1)', () => {
+    const svelteFile = i`
+      <Compontent bind:value></Compontent>
+    `;
+    expect(svelteFragmentDivider(svelteFile)).toEqual({
+      htmlFragments: [
+        {
+          endChar: 36,
+          fragment: `<Compontent bind:value></Compontent>`,
+          startChar: 0,
+          startLine: 1,
         },
       ],
     });
@@ -836,48 +866,6 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
           startLine: 2,
           startChar: 83,
           endChar: 88,
-        },
-      ],
-    });
-  });
-  test('Binding', () => {
-    const svelteFile = i`
-      <Compontent bind:property={'Foo'}>{'Bar'}</Compontent>
-      <Compontent bind:property={'Baz'}><p>{'Bax'}<p></Compontent>
-    `;
-    expect(svelteFragmentDivider(svelteFile)).toEqual({
-      htmlFragments: [
-        {
-          fragment: `<Compontent bind:property={'Foo'}>{'Bar'}</Compontent>\n<Compontent bind:property={'Baz'}><p>{'Bax'}<p></Compontent>`,
-          startLine: 1,
-          startChar: 0,
-          endChar: 115,
-        },
-      ],
-      scriptInHTMLFragments: [
-        {
-          fragment: "'Foo'",
-          startLine: 1,
-          startChar: 27,
-          endChar: 32,
-        },
-        {
-          fragment: "'Bar'",
-          startLine: 1,
-          startChar: 35,
-          endChar: 40,
-        },
-        {
-          fragment: "'Baz'",
-          startLine: 2,
-          startChar: 82,
-          endChar: 87,
-        },
-        {
-          fragment: "'Bax'",
-          startLine: 2,
-          startChar: 93,
-          endChar: 98,
         },
       ],
     });
