@@ -128,7 +128,12 @@ function getChildFragment(child: TemplateNode, svelteFile: string): SvelteCodeFr
     return children;
   }
   if (child.type === 'Attribute') {
-    return child.value.flatMap((node: TemplateNode) => getChildFragment(node, svelteFile));
+    /* If the value is not a array nothing is to do.
+     * This is the case for example for shortcut boolean attributes
+     * e.g. 'disabled' in <input disabled> */
+    if (Array.isArray(child.value)) {
+      return child.value.flatMap((node: TemplateNode) => getChildFragment(node, svelteFile));
+    }
   }
   if (['Binding'].includes(child.type)) {
     if (child.expression.type === 'Literal') {
