@@ -885,7 +885,7 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
             <Compontent class={'Baz'}><p>{'Bax'}<p></Compontent>
             <Compontent class:active={'Foo2'}>{'Bar2'}</Compontent>
             <Compontent class:active={'Baz2'}><p>{'Bax2'}<p></Compontent>
-            `,
+          `,
           startLine: 1,
           startChar: 0,
           endChar: 217,
@@ -939,6 +939,25 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
           startLine: 4,
           startChar: 194,
           endChar: 200,
+        },
+      ],
+    });
+  });
+  test('Class shortcuts', () => {
+    const svelteFile = i`
+      <Compontent class:active></Compontent>
+      <Compontent class:valid></Compontent>
+    `;
+    expect(svelteFragmentDivider(svelteFile)).toEqual({
+      htmlFragments: [
+        {
+          fragment: i`
+            <Compontent class:active></Compontent>
+            <Compontent class:valid></Compontent>
+          `,
+          startLine: 1,
+          startChar: 0,
+          endChar: 76,
         },
       ],
     });
