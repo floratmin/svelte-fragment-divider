@@ -149,14 +149,16 @@ function getChildFragment(child: TemplateNode, svelteFile: string): SvelteCodeFr
     }
   }
   if (['EventHandler', 'Class', 'Action', 'Transition', 'Animation', 'Let'].includes(child.type)) {
-    return [
-      {
-        fragment: svelteFile.slice(child.expression.start, child.expression.end),
-        startLine: child.expression.loc.start.line,
-        startChar: child.expression.start,
-        endChar: child.expression.end,
-      },
-    ];
+    if (child.expression.type === 'Literal') {
+      return [
+        {
+          fragment: svelteFile.slice(child.expression.start, child.expression.end),
+          startLine: child.expression.loc.start.line,
+          startChar: child.expression.start,
+          endChar: child.expression.end,
+        },
+      ];
+    }
   }
   if (['EachBlock', 'IfBlock', 'KeyBlock'].includes(child.type)) {
     return [
