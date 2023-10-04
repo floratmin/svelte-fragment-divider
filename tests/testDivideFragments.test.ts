@@ -828,6 +828,21 @@ describe('Testing parsing of JavaScript in Svelte with HTML', () => {
       ],
     });
   });
+  test('Binding boolean shortcut', () => {
+    const svelteFile = i`
+      <input type="checkbox" disabled checked />
+    `;
+    expect(svelteFragmentDivider(svelteFile)).toEqual({
+      htmlFragments: [
+        {
+          endChar: 42,
+          fragment: `<input type="checkbox" disabled checked />`,
+          startChar: 0,
+          startLine: 1,
+        },
+      ],
+    });
+  });
   test('EventHandler', () => {
     const svelteFile = i`
       <Compontent on:event={'Foo'}>{'Bar'}</Compontent>
